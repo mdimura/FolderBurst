@@ -16,14 +16,20 @@ rootPath=os.path.realpath(rootPath)
 
 def size_tree(rootPath,level=0):
 	d={}
-	d['name']=os.path.basename(rootPath)
+	d['name']=os.path.basename(rootPath).replace("'",'`') #a hack
 	d['children']=[]
 	size=0
-	for entry in tqdm(scandir(rootPath),position=level,leave=False,desc=('  '*level)+d['name']):
+	desc=('  '*level)+d['name']
+	desc=desc[-64:]
+	level=min(level,6)
+	for entry in tqdm(scandir(rootPath),position=level,leave=False,desc=desc):
 		if entry.is_symlink():
 			continue
 		if entry.is_file():
-			size+= entry.stat().st_size
+			try:
+				size += entry.stat().st_size
+			except Exception:
+				pass
 		if entry.is_dir():
 			tmp=size_tree(entry.path,level+1)
 			if 'children' in tmp or tmp['size']>0:
@@ -45,21 +51,21 @@ htmlPrefix='''
 <body>
     <div id="chart"></div>
     <script>
-function humanFileSize(bytes, si) {
-    var thresh = si ? 1000 : 1024;
-    if(Math.abs(bytes) < thresh) {
-        return bytes + ' B';
-    }
-    var units = si
-        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-    var u = -1;
-    do {
-        bytes /= thresh;
-        ++u;
-    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-    return bytes.toFixed(1)+' '+units[u];
-}
+        function humanFileSize(bytes, si) {
+            var thresh = si ? 1000 : 1024;
+            if(Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+            var units = si
+                ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+                : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+            var u = -1;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+            return bytes.toFixed(1)+' '+units[u];
+        }
         const data = JSON.parse(' '''
 htmlSuffix=''' ');
         
