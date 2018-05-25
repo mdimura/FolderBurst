@@ -45,6 +45,21 @@ htmlPrefix='''
 <body>
     <div id="chart"></div>
     <script>
+function humanFileSize(bytes, si) {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
+}
         const data = JSON.parse(' '''
 htmlSuffix=''' ');
         
@@ -55,7 +70,7 @@ htmlSuffix=''' ');
             .showLabels(true)
             .size('size')
             .color(d => color(d.name))
-            .tooltipContent((d, node) => `Size: <i>${node.value/1000} kB</i>`)
+            .tooltipContent((d, node) => `Size: <i>${humanFileSize(node.value)}</i>`)
             (document.getElementById('chart'));
     </script>
 </body>
