@@ -21,8 +21,8 @@ def size_tree(rootPath,level=0):
 	size=0
 	desc=('  '*level)+d['name']
 	desc=desc[-64:]
-	level=min(level,6)
-	for entry in tqdm(scandir(rootPath),position=level,leave=False,desc=desc):
+	position=min(level,6)
+	for entry in tqdm(scandir(rootPath),position=position,leave=False,desc=desc):
 		if entry.is_symlink():
 			continue
 		if entry.is_file():
@@ -72,6 +72,7 @@ htmlSuffix=''' ');
         const color = d3.scaleOrdinal(d3.schemeCategory20);
         Sunburst()
             .data(data)
+            .sort((a, b) => b.value - a.value)
             .minSliceAngle(1.0)
             .showLabels(true)
             .size('size')
